@@ -21,7 +21,8 @@ class GeoipDatabaseUpdater
     {
         $this->log->info('GeoIP Database Update: Starting check.');
 
-        if (!$this->geoSettings->autoUpdateEnabled()) {
+        // 手动触发时（force=true）跳过自动更新开关检查
+        if (!$force && !$this->geoSettings->autoUpdateEnabled()) {
             $this->log->warning('GeoIP Database Update: Aborted because auto-update is disabled.');
             throw new \RuntimeException('Auto-update is disabled.');
         }

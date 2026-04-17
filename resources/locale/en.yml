@@ -2,6 +2,10 @@ momokoudai-geoip-local:
   admin:
     settings:
       title: "GeoIP Local Settings"
+      general_heading: "General Settings"
+      maxmind_heading: "MaxMind Configuration(optional)"
+      auto_update_heading: "Auto Update"
+      manual_update_heading: "Manual Update"
       driver_label: "Local database type"
       driver_maxmind_mmdb: "MaxMind MMDB (GeoLite2/GeoIP2)"
       driver_dbip_mmdb: "DB-IP MMDB"
@@ -27,3 +31,9 @@ momokoudai-geoip-local:
       tools_label: "Tools"
       tools_help: "Upload a local GeoIP database (.mmdb/.bin), or test an IP resolution result."
       tools_test_button: "Test IP"
+
+fof-geoip:
+  admin:
+    settings:
+      service_geoip-local_label: "GeoIP Local (Local Resolution)"
+      service_geoip-local_description: "Use local database files for IP geolocation resolution, supporting MaxMind, DB-IP, and IP2Location."

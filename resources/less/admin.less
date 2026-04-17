@@ -1,3 +1,33 @@
-// GeoIP Local - Admin Styles
-
-// No custom admin styles needed at this time
+.GeoipLocalSettingsPage {
+    padding-top: 20px;
+  
+    .Button {
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+  
+      h3 {
+        color: @primary-color;
+        margin-bottom: 10px;
+      }
+  
+      .Section {
+        background: @body-bg;
+        border-radius: @border-radius;
+        margin-bottom: 20px;
+      }
+  
+      .Form {
+        input {
+            max-width: 300px;
+        }
+      }
+  
+    &--settings {
+      margin: 0 auto;
+  
+      @media @desktop-up {
+        margin: 0;
+      }
+    }
+}

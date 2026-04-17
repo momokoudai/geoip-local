@@ -2,6 +2,10 @@ momokoudai-geoip-local:
   admin:
     settings:
       title: "GeoIP Local 设置"
+      general_heading: "常规设置"
+      maxmind_heading: "MaxMind 配置(选填)"
+      auto_update_heading: "自动更新"
+      manual_update_heading: "手动更新"
       driver_label: "本地数据库类型"
       driver_maxmind_mmdb: "MaxMind MMDB（GeoLite2/GeoIP2）"
       driver_dbip_mmdb: "DB-IP MMDB"
@@ -27,3 +31,9 @@ momokoudai-geoip-local:
       tools_label: "工具"
       tools_help: "上传本地 GeoIP 数据库文件（.mmdb/.bin），或测试某个 IP 的解析结果。"
       tools_test_button: "测试 IP"
+
+fof-geoip:
+  admin:
+    settings:
+      service_geoip-local_label: "GeoIP Local (本地解析)"
+      service_geoip-local_description: "使用本地数据库文件进行 IP 地理位置解析，支持 MaxMind、DB-IP 和 IP2Location。"
