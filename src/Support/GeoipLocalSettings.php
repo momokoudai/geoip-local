@@ -21,37 +21,32 @@ class GeoipLocalSettings
 
     public function databasePath(): ?string
     {
-        $path = $this->settings->get('momokoudai-geoip-local.db_path');
-        if ($path) {
-            $path = trim((string) $path);
-            if ($path === '') return null;
+        $fileName = $this->settings->get('momokoudai-geoip-local.db_path');
+        if ($fileName) {
+            $fileName = trim((string) $fileName);
+            if ($fileName === '') return null;
 
-            // 如果是绝对路径且文件存在，直接使用
-            if (str_starts_with($path, '/') && is_file($path)) {
-                return $path;
+            // 验证扩展名必须是 mmdb 或 bin
+            $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            if (!in_array($ext, ['mmdb', 'bin'], true)) {
+                return null;
             }
 
-            // 相对路径统一基于 storage 目录解析
-            if (!str_starts_with($path, '/') && !preg_match('/^[a-zA-Z]:/', $path)) {
-                return $this->paths->storage . '/' . $path;
+            // 只允许安全字符：字母、数字、下划线、连字符、点
+            $safeName = preg_replace('/[^a-zA-Z0-9_\-\.]/', '', basename($fileName));
+            if ($safeName === '' || !str_ends_with($safeName, '.' . $ext)) {
+                return null;
             }
 
-            // 其他情况直接返回（可能是错误的绝对路径）
-            return $path;
+            // 只能使用 storage/geoip/ 目录下的文件
+            return $this->paths->storage . '/geoip/' . $safeName;
         }
 
-        // Fallback to default path in storage/geoip/
+        // Fallback: 根据驱动类型使用默认文件名
         $driver = $this->databaseDriver();
         $ext = $driver === 'ip2location-bin' ? 'bin' : 'mmdb';
-        
-        // 优先检查 custom.mmdb（自动更新默认文件名）
-        $customPath = $this->paths->storage . "/geoip/custom.{$ext}";
-        if (is_file($customPath)) {
-            return $customPath;
-        }
-        
-        // 其次检查 geoip-local.{ext}（旧版本或手动上传）
-        $defaultPath = $this->paths->storage . "/geoip/geoip-local.{$ext}";
+        $defaultFileName = "custom.{$ext}";
+        $defaultPath = $this->paths->storage . "/geoip/{$defaultFileName}";
         return is_file($defaultPath) ? $defaultPath : null;
     }
 
@@ -88,5 +83,29 @@ class GeoipLocalSettings
         $url = trim((string) $url);
 
         return $url === '' ? null : $url;
+    }
+
+    public function databaseFileName(): ?string
+    {
+        $fileName = $this->settings->get('momokoudai-geoip-local.db_path');
+        if ($fileName) {
+            $fileName = trim((string) $fileName);
+            if ($fileName === '') return null;
+            
+            // 验证扩展名
+            $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            if (!in_array($ext, ['mmdb', 'bin'], true)) {
+                return null;
+            }
+            
+            // 只允许安全字符：字母、数字、下划线、连字符、点
+            $safeName = preg_replace('/[^a-zA-Z0-9_\-\.]/', '', basename($fileName));
+            if ($safeName === '' || !str_ends_with($safeName, '.' . $ext)) {
+                return null;
+            }
+            
+            return $safeName;
+        }
+        return null;
     }
 }

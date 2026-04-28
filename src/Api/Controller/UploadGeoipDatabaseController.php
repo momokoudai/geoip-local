@@ -35,30 +35,42 @@ class UploadGeoipDatabaseController implements RequestHandlerInterface
         }
 
         $clientName = $file->getClientFilename() ?: 'geoip.db';
-        $ext = strtolower(pathinfo($clientName, PATHINFO_EXTENSION));
+        // 只保存文件名，不带路径
+        $fileName = basename($clientName);
+        
+        // 验证扩展名
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         if (!in_array($ext, ['mmdb', 'bin'], true)) {
             return new JsonResponse(['error' => 'Only .mmdb or .bin is allowed'], 422);
         }
 
-        $dir = $this->paths->storage.'/geoip-local';
+        // 只允许安全字符：字母、数字、下划线、连字符、点
+        $safeName = preg_replace('/[^a-zA-Z0-9_\-\.]/', '', $fileName);
+        if ($safeName === '' || !str_ends_with($safeName, '.' . $ext)) {
+            return new JsonResponse(['error' => 'Invalid filename'], 422);
+        }
+
+        // 确保目录存在
+        $dir = $this->paths->storage.'/geoip';
         if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
             return new JsonResponse(['error' => 'Cannot create storage directory'], 500);
         }
-
-        $safeBase = Str::slug(pathinfo($clientName, PATHINFO_FILENAME));
-        if ($safeBase === '') {
-            $safeBase = 'geoip';
+        
+        $target = $dir . '/' . $safeName;
+        
+        // 如果文件已存在，先删除（覆盖）
+        if (file_exists($target)) {
+            @unlink($target);
         }
-
-        $target = $dir.'/'.$safeBase.'-'.date('Ymd-His').'.'.$ext;
+        
         $file->moveTo($target);
 
-        $this->settings->set('momokoudai-geoip-local.db_path', $target);
+        // 保存文件名（不带路径）
+        $this->settings->set('momokoudai-geoip-local.db_path', $fileName);
 
         return new JsonResponse([
-            'ok' => true,
+                    'ok' => true,
             'path' => $target,
         ]);
     }
 }
-

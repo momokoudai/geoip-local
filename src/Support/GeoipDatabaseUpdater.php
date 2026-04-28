@@ -59,22 +59,25 @@ class GeoipDatabaseUpdater
             throw new \RuntimeException("Auto-update currently supports MaxMind (or provide a custom URL). Current driver: {$driver}.");
         }
 
-        $licenseKey = $this->geoSettings->maxmindLicenseKey();
-
-        if (!$licenseKey) {
-            $this->log->error('GeoIP Database Update: Missing MaxMind license key.');
-            throw new \RuntimeException('Missing MaxMind license_key in settings.');
-        }
-
-        return $this->downloadMaxMind($licenseKey);
+        return $this->downloadMaxMind();
     }
 
-    private function downloadMaxMind(string $licenseKey): array
+    private function downloadMaxMind(): array
     {
-        $target = $this->geoSettings->databasePath();
-        if (!$target) {
-            $target = $this->paths->storage . '/geoip/GeoLite2-City.mmdb';
+        // 获取配置的文件名，如果为空则使用默认 custom.mmdb
+        $fileName = $this->geoSettings->databaseFileName();
+        if (!$fileName) {
+            $fileName = 'custom.mmdb';
         }
+
+        // 验证扩展名
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['mmdb', 'bin'], true)) {
+            throw new \Exception('Invalid file extension. Only .mmdb or .bin allowed.');
+        }
+
+        // 固定路径为 storage/geoip/
+        $target = $this->paths->storage . '/geoip/' . basename($fileName);
 
         $this->log->info('GeoIP Database Update (MaxMind): Preparing download.', ['target' => $target]);
 
@@ -85,6 +88,11 @@ class GeoipDatabaseUpdater
         }
 
         $editionId = 'GeoLite2-City';
+        // MaxMind 官方源需要 License Key，如果后台没有配置界面，建议用户使用自定义 URL
+        $licenseKey = $this->geoSettings->maxmindLicenseKey();
+        if (!$licenseKey) {
+            throw new \RuntimeException('MaxMind update requires a license key. Please use Custom URL instead.');
+        }
         $url = "https://download.maxmind.com/app/geoip_download?edition_id={$editionId}&license_key={$licenseKey}&suffix=tar.gz";
 
         $client = new Client([
@@ -149,7 +157,8 @@ class GeoipDatabaseUpdater
                 }
             }
 
-            $this->settings->set('momokoudai-geoip-local.db_path', $target);
+            // 保存文件名（不带路径）
+            $this->settings->set('momokoudai-geoip-local.db_path', $fileName);
             $this->settings->set('momokoudai-geoip-local.auto_update.last_run', time());
 
             $this->log->info('GeoIP Database Update (MaxMind): Update successful.', ['path' => $target]);
@@ -168,10 +177,20 @@ class GeoipDatabaseUpdater
 
     private function downloadFromCustomUrl(string $url): array
     {
-        $target = $this->geoSettings->databasePath();
-        if (!$target) {
-            $target = $this->paths->storage . '/geoip/custom.mmdb';
+        // 获取配置的文件名，如果为空则使用默认 custom.mmdb
+        $fileName = $this->geoSettings->databaseFileName();
+        if (!$fileName) {
+            $fileName = 'custom.mmdb';
         }
+
+        // 验证扩展名
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['mmdb', 'bin'], true)) {
+            throw new \Exception('Invalid file extension. Only .mmdb or .bin allowed.');
+        }
+
+        // 固定路径为 storage/geoip/
+        $target = $this->paths->storage . '/geoip/' . basename($fileName);
 
         $this->log->info('GeoIP Database Update (Custom URL): Preparing download.', ['target' => $target, 'url' => $url]);
 
@@ -252,7 +271,8 @@ class GeoipDatabaseUpdater
                 }
             }
 
-            $this->settings->set('momokoudai-geoip-local.db_path', $target);
+            // 保存文件名（不带路径）
+            $this->settings->set('momokoudai-geoip-local.db_path', $fileName);
             $this->settings->set('momokoudai-geoip-local.auto_update.last_run', time());
 
             $this->log->info('GeoIP Database Update (Custom URL): Update successful.', ['path' => $target]);

@@ -13,7 +13,7 @@ use Flarum\Extend;
 use Illuminate\Console\Scheduling\Event as ScheduleEvent;
 use momokoudai\GeoipLocal\Api\Serializer\AddGeoipLocalToPost;
 use momokoudai\GeoipLocal\Api\Controller\TestGeoipLocalController;
-use momokoudai\GeoipLocal\Api\Controller\UploadGeoipDatabaseController;
+// use momokoudai\GeoipLocal\Api\Controller\UploadGeoipDatabaseController;
 use momokoudai\GeoipLocal\Api\Controller\GeoipLocalQueryController;
 use momokoudai\GeoipLocal\Api\Controller\UpdateGeoipDatabaseController;
 use momokoudai\GeoipLocal\Console\UpdateGeoipDatabaseCommand;
@@ -46,7 +46,7 @@ return [
         }),
 
     (new Extend\Routes('api'))
-        ->post('/geoip-local/upload', 'momokoudai-geoip-local.api.upload', UploadGeoipDatabaseController::class)
+        // ->post('/geoip-local/upload', 'momokoudai-geoip-local.api.upload', UploadGeoipDatabaseController::class)
         ->get('/geoip-local/test', 'momokoudai-geoip-local.api.test', TestGeoipLocalController::class)
         ->get('/geoip-local/query/{ip}', 'momokoudai-geoip-local.api.query', GeoipLocalQueryController::class)
         ->post('/geoip-local/update-db', 'momokoudai-geoip-local.api.update-db', UpdateGeoipDatabaseController::class),
