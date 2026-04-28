@@ -15,7 +15,7 @@ class GeoipLocal implements ServiceInterface
      * The host/endpoint URL for the service.
      * For local database services, we use a placeholder to prevent cURL errors.
      */
-    public string $host = 'http://127.0.0.1';
+    public string $host = '';
 
     /**
      * HTTP client instance.
